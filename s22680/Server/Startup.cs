@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using s22680.Server.Data;
 using s22680.Server.Models;
+using s22680.Server.Services;
 using System.Linq;
 
 namespace s22680.Server
@@ -26,9 +27,12 @@ namespace s22680.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<ITickerService,TickerService>();
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
