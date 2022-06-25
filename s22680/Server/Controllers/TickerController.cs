@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace s22680.Server.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class TickerController : ControllerBase

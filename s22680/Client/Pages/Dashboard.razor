@@ -1,36 +1,53 @@
 ﻿@page "/dashboard"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Newtonsoft.Json;
-@using s22680.Shared
-@using s22680.Shared.Models
 @attribute [Authorize]
 @inject HttpClient Http
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+
 
 <h1>Dashboard</h1>
+<button class="btn btn-primary" @onclick="BeginSignOut">Log out</button>
 
 <p>This component demonstrates fetching data from the server.</p>
 
-@if (tickers == null)
+@if (Tickers == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
    <P>content</P>
+   <table class="table">
+       @foreach(var s in Tickers)
+       {
+       <tr>
+           <td>@s.Name</td
+           
+       </tr>
+       
+       }
+
+
+   </table>
 }
 
 @code {
-    private TickersGet tickers;
+    private List<TickerData> Tickers;
+    public List<Student> Students{ get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var result = await Http.GetAsync("Ticker");
+            var HttpClient = new HttpClient();
+            var result = await HttpClient.GetAsync("https://localhost:44328/api/ticker");
             var data = await result.Content.ReadAsStringAsync();
 
-            tickers=JsonConvert.DeserializeObject<TickersGet>(data);
+           Tickers=JsonConvert.DeserializeObject<List<TickerData>>(data);
           
             
         }
@@ -39,5 +56,11 @@ else
             exception.Redirect();
         }
     }
+     private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/login");
+    }
+
 
 }
