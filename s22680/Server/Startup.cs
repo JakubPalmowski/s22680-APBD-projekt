@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using s22680.Server.Data;
 using s22680.Server.Models;
 using s22680.Server.Services;
+using Syncfusion.Blazor;
 using System.Linq;
 
 namespace s22680.Server
@@ -47,6 +48,8 @@ namespace s22680.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+           
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,5 +9,9 @@ namespace s22680.Server.Services
     {
         public Task<IEnumerable<TickerData>> GetTickers(string request);
 
+        public Task<TickerDetails> GetTickerDetails(string request);
+
+        public Task<IEnumerable<Stock>> GetStocks(string request,string from);
+
     }
 }

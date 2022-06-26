@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Syncfusion.Blazor;
 
 namespace s22680.Client
 {
@@ -15,8 +16,10 @@ namespace s22680.Client
     {
         public static async Task Main(string[] args)
         {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NjYyMDEyQDMyMzAyZTMxMmUzMGxRRURyYjk0ckdIMFNKM3dhYW5SUERxdjJmZmNLUU1PNEZlckM2aDM0VlE9");
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
+            builder.Services.AddSyncfusionBlazor();
 
             builder.Services.AddHttpClient("s22680.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();

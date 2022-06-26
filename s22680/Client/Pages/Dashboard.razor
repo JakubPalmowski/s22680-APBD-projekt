@@ -7,44 +7,236 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Charts
 
+
+
+<style>
+    .control-wrapper {
+        max-width: 250px;
+        margin: 0 auto;
+        padding: 50px 0px 0px;
+    }
+    .example-label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .logoimage{
+		width:150px;
+		height:150px;
+		float:left;
+        padding-left:
+		}
+		.info
+		{
+		float:left;
+		}
+		.infocontainer{
+		overflow: hidden;
+		color:rgb(39, 169, 211);
+        font-size:18px;
+		}
+		.infotext{
+		padding-right:10px;
+        font-size:14px;
+		}
+</style>
 
 <h1>Dashboard</h1>
-<button class="btn btn-primary" @onclick="BeginSignOut">Log out</button>
+<button class="btn btn-primary" @onclick="BeginSignOut">LOGOUT</button>
+<P>content</P>
+<input type="text" class="searchCompany" @bind="search" />
+<button class="btn btn-primary" @onclick="ShowAutoFill">SEARCH</button>
+<button class="btn btn-primary" >WATCHLIST</button>
 
-<p>This component demonstrates fetching data from the server.</p>
 
 @if (Tickers == null)
 {
-    <p><em>Loading...</em></p>
+   
 }
 else
 {
-   <P>content</P>
-   <table class="table">
+   @if(showTable)
+   {
+
+    <table class="table">
        @foreach(var s in Tickers)
        {
        <tr>
-           <td>@s.Name</td
+           <td @onclick="@(e=>ShowDetails(s.Ticker))">@s.Name</td>
            
        </tr>
        
        }
 
+   </table>
+    }
+  
+    if (TickerDetails == null)
+    {
+        
+    }
+    else
+    {
+        <div class="infocontainer">
+	<div class="obrazek">
+		<img class="logoimage" alt="Image not found" src="@logoUrl" />
+	</div>
+	<div info>
+	<h2>@TickerDetails.Name (@TickerDetails.Ticker)</h2>
+	<h3><span class="infotext">Country:@TickerDetails.Locale</span> <span class="infotext">Industry:@TickerDetails.sic_description</span></h3>
+	
+	</div>
+  </div>
+
+
+     <table class="table">
+       @foreach(var s in StocksList)
+       {
+       <tr>
+           <td>@s.date</td>
+           
+       </tr>
+       
+       }
 
    </table>
+
+
+   <div class="control-section" align='center'>
+    <SfChart Title="AAPL Historical" Width="@Width" Theme="@Theme">
+        <ChartArea>
+            <ChartAreaBorder Width="0"></ChartAreaBorder>
+        </ChartArea>
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime">
+            <ChartAxisCrosshairTooltip Enable="true"></ChartAxisCrosshairTooltip>
+            <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+        </ChartPrimaryXAxis>
+        <ChartPrimaryYAxis Title="Price" RangePadding="ChartRangePadding.None" Interval="20" LabelFormat="n0">
+            <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+            <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+        </ChartPrimaryYAxis>
+        <ChartLegendSettings Visible="false"></ChartLegendSettings>
+        <ChartTooltipSettings Enable="true" Shared="true"></ChartTooltipSettings>
+        <ChartCrosshairSettings Enable="true" LineType="LineType.Vertical">
+        </ChartCrosshairSettings>
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@ChartPoints" Name="Apple Inc" XName="Period" High="High" Low="Low" Open="Open" Close="Close"
+                         BearFillColor="#2ecd71" BullFillColor="#e74c3d" Type="ChartSeriesType.HiloOpenClose">
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
+</div>
+
+
+
+
+
+
+
+
+
+    }
+
+
+
 }
 
-@code {
-    private List<TickerData> Tickers;
-    public List<Student> Students{ get; set; }
 
+@code {
+
+    private Theme Theme { get; set; }
+    public string Width { get; set; } = "90%";
+    public HLOCData[] ChartPoints { get; set; } = new HLOCData[] { };
     protected override async Task OnInitializedAsync()
+    {
+        ChartPoints = await Http.GetFromJsonAsync<HLOCData[]>(NavigationManager.BaseUri + SampleService.WebAssetsPath + "data/chart/financial-data.json");
+    }
+    protected override void OnInitialized()
+    {
+        Theme = ThemeHelper.GetCurrentTheme(NavigationManager.Uri);
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if(firstRender) {
+            if (SampleService.IsDevice)
+            {
+                 Width = "100%";
+                 StateHasChanged();
+            }
+        }
+    }
+    public class HLOCData
+    {
+        public DateTime Period { get; set; }
+        public double High { get; set; }
+        public double Low { get; set; }
+        public double Open { get; set; }
+        public double Close { get; set; }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public List<TickerData> Tickers;
+    public List<Stock> StocksList;
+    public TickerDetails TickerDetails { get; set; }
+    public string logoUrl = "";
+    public string search = "";
+    public string date = "2022-06-19";
+    public bool showTable = true;
+
+
+
+
+    public async Task ShowDetails(string tickerCode)
+    {
+
+        try
+        {
+            showTable=false; 
+            var HttpClient = new HttpClient();
+            var result = await HttpClient.GetAsync("https://localhost:44328/api/Ticker/details/"+tickerCode);
+            var data = await result.Content.ReadAsStringAsync();
+
+            TickerDetails=JsonConvert.DeserializeObject<TickerDetails>(data);
+            logoUrl = TickerDetails.Branding.icon_url+"?apiKey=9pFjWPppUCFwVZ4WlFsSUlXrpFniSKEO";
+
+
+            HttpClient = new HttpClient();
+            result = await HttpClient.GetAsync("https://localhost:44328/api/Ticker/stocks/" + tickerCode+"/"+date);
+            data = await result.Content.ReadAsStringAsync();
+            StocksList=JsonConvert.DeserializeObject<List<Stock>>(data);
+
+
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+    }
+
+
+    public async Task ShowAutoFill()
     {
         try
         {
+            showTable = true;
             var HttpClient = new HttpClient();
-            var result = await HttpClient.GetAsync("https://localhost:44328/api/ticker");
+            var result = await HttpClient.GetAsync("https://localhost:44328/api/ticker/"+search);
             var data = await result.Content.ReadAsStringAsync();
 
            Tickers=JsonConvert.DeserializeObject<List<TickerData>>(data);
@@ -55,11 +247,19 @@ else
         {
             exception.Redirect();
         }
+    
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        
     }
      private async Task BeginSignOut(MouseEventArgs args)
     {
         await SignOutManager.SetSignOutState();
-        Navigation.NavigateTo("authentication/login");
+      
+        Navigation.NavigateTo("/");
     }
 
 
